@@ -129,23 +129,20 @@ func main() {
 
 	// ---- Phase 2: Reconstruct bottom-up ----
 
-	byVariant := dbutil.GroupBy(inventory, func(i Inventory) int { return i.VariantID })
 	dbutil.MergeChildren(
-		variants, byVariant,
+		variants, dbutil.GroupBy(inventory, func(i Inventory) int { return i.VariantID }),
 		func(v Variant) int { return v.ID },
 		func(v *Variant, inv []Inventory) { v.Inventory = inv },
 	)
 
-	byProduct := dbutil.GroupBy(variants, func(v Variant) int { return v.ProductID })
 	dbutil.MergeChildren(
-		products, byProduct,
+		products, dbutil.GroupBy(variants, func(v Variant) int { return v.ProductID }),
 		func(p Product) int { return p.ID },
 		func(p *Product, vs []Variant) { p.Variants = vs },
 	)
 
-	byCategory := dbutil.GroupBy(products, func(p Product) int { return p.CategoryID })
 	dbutil.MergeChildren(
-		categories, byCategory,
+		categories, dbutil.GroupBy(products, func(p Product) int { return p.CategoryID }),
 		func(c Category) int { return c.ID },
 		func(c *Category, ps []Product) { c.Products = ps },
 	)

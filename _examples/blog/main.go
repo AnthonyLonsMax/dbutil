@@ -90,16 +90,14 @@ func main() {
 
 	// ---- Phase 2: Reconstruct bottom-up ----
 
-	byPost := dbutil.GroupBy(comments, func(c Comment) int { return c.PostID })
 	dbutil.MergeChildren(
-		posts, byPost,
+		posts, dbutil.GroupBy(comments, func(c Comment) int { return c.PostID }),
 		func(p Post) int { return p.ID },
 		func(p *Post, cs []Comment) { p.Comments = cs },
 	)
 
-	byAuthor := dbutil.GroupBy(posts, func(p Post) int { return p.AuthorID })
 	dbutil.MergeChildren(
-		authors, byAuthor,
+		authors, dbutil.GroupBy(posts, func(p Post) int { return p.AuthorID }),
 		func(a Author) int { return a.ID },
 		func(a *Author, ps []Post) { a.Posts = ps },
 	)

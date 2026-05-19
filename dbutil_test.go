@@ -96,16 +96,14 @@ func TestThreeLevelNesting(t *testing.T) {
 
 	// ---------- Phase 2: Reconstruct bottom-up ----------
 
-	byProduct := GroupBy(variants, func(v testVar) int { return v.ProductID })
 	MergeChildren(
-		products, byProduct,
+		products, GroupBy(variants, func(v testVar) int { return v.ProductID }),
 		func(p testProd) int { return p.ID },
 		func(p *testProd, vs []testVar) { p.Variants = vs },
 	)
 
-	byCategory := GroupBy(products, func(p testProd) int { return p.CategoryID })
 	MergeChildren(
-		categories, byCategory,
+		categories, GroupBy(products, func(p testProd) int { return p.CategoryID }),
 		func(c testCat) int { return c.ID },
 		func(c *testCat, ps []testProd) { c.Products = ps },
 	)
@@ -287,23 +285,20 @@ func TestFourLevelNesting(t *testing.T) {
 
 	// ---------- Phase 2: Reconstruct bottom-up ----------
 
-	byCity := GroupBy(districts, func(d testDist) int { return d.CityID })
 	MergeChildren(
-		cities, byCity,
+		cities, GroupBy(districts, func(d testDist) int { return d.CityID }),
 		func(c testCity4) int { return c.ID },
 		func(c *testCity4, ds []testDist) { c.Districts = ds },
 	)
 
-	byCountry := GroupBy(cities, func(c testCity4) int { return c.CountryID })
 	MergeChildren(
-		countries, byCountry,
+		countries, GroupBy(cities, func(c testCity4) int { return c.CountryID }),
 		func(c testCountry4) int { return c.ID },
 		func(c *testCountry4, cs []testCity4) { c.Cities = cs },
 	)
 
-	byContinent := GroupBy(countries, func(c testCountry4) int { return c.ContinentID })
 	MergeChildren(
-		continents, byContinent,
+		continents, GroupBy(countries, func(c testCountry4) int { return c.ContinentID }),
 		func(c testContinent4) int { return c.ID },
 		func(c *testContinent4, cs []testCountry4) { c.Countries = cs },
 	)
@@ -539,37 +534,32 @@ func TestSixLevelNesting(t *testing.T) {
 
 	// ---------- Phase 2: Reconstruct bottom-up ----------
 
-	byDistrict := GroupBy(buildings, func(b testBuilding6) int { return b.DistrictID })
 	MergeChildren(
-		districts, byDistrict,
+		districts, GroupBy(buildings, func(b testBuilding6) int { return b.DistrictID }),
 		func(d testDistrict6) int { return d.ID },
 		func(d *testDistrict6, bs []testBuilding6) { d.Buildings = bs },
 	)
 
-	byCity := GroupBy(districts, func(d testDistrict6) int { return d.CityID })
 	MergeChildren(
-		cities, byCity,
+		cities, GroupBy(districts, func(d testDistrict6) int { return d.CityID }),
 		func(c testCity6) int { return c.ID },
 		func(c *testCity6, ds []testDistrict6) { c.Districts = ds },
 	)
 
-	byRegion := GroupBy(cities, func(c testCity6) int { return c.RegionID })
 	MergeChildren(
-		regions, byRegion,
+		regions, GroupBy(cities, func(c testCity6) int { return c.RegionID }),
 		func(r testRegion6) int { return r.ID },
 		func(r *testRegion6, cs []testCity6) { r.Cities = cs },
 	)
 
-	byCountry := GroupBy(regions, func(r testRegion6) int { return r.CountryID })
 	MergeChildren(
-		countries, byCountry,
+		countries, GroupBy(regions, func(r testRegion6) int { return r.CountryID }),
 		func(c testCountry6) int { return c.ID },
 		func(c *testCountry6, rs []testRegion6) { c.Regions = rs },
 	)
 
-	byContinent := GroupBy(countries, func(c testCountry6) int { return c.ContinentID })
 	MergeChildren(
-		continents, byContinent,
+		continents, GroupBy(countries, func(c testCountry6) int { return c.ContinentID }),
 		func(c testContinent6) int { return c.ID },
 		func(c *testContinent6, cs []testCountry6) { c.Countries = cs },
 	)
