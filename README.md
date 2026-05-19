@@ -110,6 +110,50 @@ MergeChildren(cats, byCat,
     func(c Category) int { return c.ID },
     func(c *Category, ps []Product) { c.Products = ps },
 )
+
+Output:
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Alice",
+    "posts": [
+      {
+        "id": 1,
+        "author_id": 1,
+        "title": "First Post",
+        "comments": [
+          { "id": 1, "post_id": 1, "author": "Charlie", "body": "Great post!" },
+          { "id": 2, "post_id": 1, "author": "Diana", "body": "Thanks!" }
+        ]
+      },
+      {
+        "id": 2,
+        "author_id": 1,
+        "title": "Second Post",
+        "comments": [
+          { "id": 3, "post_id": 2, "author": "Eve", "body": "Nice write-up" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Bob",
+    "posts": [
+      {
+        "id": 3,
+        "author_id": 2,
+        "title": "Hello World",
+        "comments": [
+          { "id": 4, "post_id": 3, "author": "Frank", "body": "First comment!" },
+          { "id": 5, "post_id": 3, "author": "Grace", "body": "Awesome blog" }
+        ]
+      }
+    ]
+  }
+]
 ```
 
 ### With sqlc
@@ -147,6 +191,73 @@ dbutil.MergeChildren(cats, byCat,
     func(c Category) int32 { return c.ID },
     func(c *Category, ps []Product) { c.Products = ps },
 )
+```
+
+Output (with per-level filters: only active categories, published products with price > 0, variants with stock > 0, inventory with quantity > 0):
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Clothing",
+    "active": true,
+    "products": [
+      {
+        "id": 1,
+        "category_id": 1,
+        "name": "T-Shirt",
+        "price": 19.99,
+        "published": true,
+        "variants": [
+          {
+            "id": 1,
+            "product_id": 1,
+            "name": "Small",
+            "stock": 10,
+            "inventory": [
+              { "id": 1, "variant_id": 1, "warehouse": "Warehouse A", "quantity": 20 },
+              { "id": 2, "variant_id": 1, "warehouse": "Warehouse B", "quantity": 5 }
+            ]
+          },
+          {
+            "id": 3,
+            "product_id": 1,
+            "name": "Large",
+            "stock": 5,
+            "inventory": [
+              { "id": 3, "variant_id": 3, "warehouse": "Warehouse A", "quantity": 10 }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Electronics",
+    "active": true,
+    "products": [
+      {
+        "id": 3,
+        "category_id": 2,
+        "name": "Headphones",
+        "price": 99.99,
+        "published": true,
+        "variants": [
+          {
+            "id": 4,
+            "product_id": 3,
+            "name": "Wired",
+            "stock": 3,
+            "inventory": [
+              { "id": 5, "variant_id": 4, "warehouse": "Warehouse B", "quantity": 8 }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
 ```
 
 ## Deeper Nesting
