@@ -34,6 +34,27 @@ Yes, if you:
 - Need **per-level filtering/pagination** (impossible with a single JOIN).
 - Want something minimal: 3 functions, zero library dependencies.
 
+### When to Use This Library Over Database-Side JSON
+
+Many modern databases can build nested JSON directly (e.g. `JSON_AGG`, `JSON_BUILD_OBJECT` in PostgreSQL). However, this library is a better fit when:
+
+- **Your DB doesn't support JSON functions** — SQLite, MySQL < 5.7, older PostgreSQL versions, or any legacy/commercial DB without JSON aggregation.
+- **You need per-level filtering** — database JSON aggregation forces a single query; you cannot apply different WHERE/pagination/sorting per nesting level. With this library each level is an independent query.
+- **You want type safety** — JSON aggregation returns `[]byte` or a driver-specific type you must deserialize. This library works directly with typed Go structs via generics.
+- **The reconstruction is complex** — deeply nested structures with 4+ levels become unwieldy in SQL but remain flat and readable in Go.
+- **You avoid vendor lock-in** — the same Go code works with PostgreSQL, MySQL, SQLite, SQL Server, etc. without changing a single line.
+
+### What Makes This Library Stand Out
+
+| Concern | This library | JSON in SQL | ORM |
+|---------|-------------|-------------|-----|
+| Per-level filters | ✅ Yes | ❌ Single query | ✅ Yes |
+| DB-agnostic | ✅ Any driver | ❌ PostgreSQL only | ✅ Most ORMs |
+| No runtime deps | ✅ 0 dependencies | ✅ None | ❌ Heavy |
+| Type-safe | ✅ Generics | ❌ `[]byte` | ✅ Usually |
+| Learning curve | ~3 functions | ❌ Complex SQL | ❌ Large API surface |
+| N+1 elimination | ✅ Batch WHERE IN | ✅ Single query | ✅ Eager loading |
+
 It won't replace an ORM for every use case, but for the common pattern of "query parents → batch-query children → merge", it removes the boilerplate.
 
 ## The Pattern
@@ -110,6 +131,7 @@ MergeChildren(cats, byCat,
     func(c Category) int { return c.ID },
     func(c *Category, ps []Product) { c.Products = ps },
 )
+```
 
 Output:
 
